@@ -16,8 +16,8 @@
             <div class="space-x-6">
                 <a href="#" class="hover:text-blue-600 transition">Features</a>
                 <a href="#" class="hover:text-blue-600 transition">Pricing</a>
-                <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                    Contact Sales
+                <button id="logout-btn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">
+                    Logout
                 </button>
             </div>
         </div>
@@ -246,5 +246,25 @@
     });
 });
     </script>
+
+<script>
+    // Logout functionality
+    document.getElementById('logout-btn').addEventListener('click', function() {
+        // Remove access token from localStorage
+        localStorage.removeItem('access_token');
+        
+        // Redirect to login page
+        window.location.href = '/login';
+    });
+
+    // Optional: Check for existing token on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            // If no token exists, redirect to login
+            window.location.href = '/login';
+        }
+    });
+</script>
 </body>
 </html>
