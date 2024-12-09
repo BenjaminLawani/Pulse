@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Image - Pulse</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white text-gray-900 font-sans">
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="text-2xl font-bold text-blue-600">Pulse</div>
+            </div>
+            <div class="space-x-6">
+                <a href="#" class="hover:text-blue-600 transition">Features</a>
+                <a href="#" class="hover:text-blue-600 transition">Pricing</a>
+                <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                    Contact Sales
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Upload Image Section -->
+    <div class="container mx-auto px-4 py-16 grid md:grid-cols-2 gap-12 items-center">
+        <!-- Upload Form Section -->
+        <div class="bg-white p-10 rounded-xl shadow-2xl">
+            <h2 class="text-4xl font-bold mb-6 text-gray-900">Upload Medical Image</h2>
+            <p class="text-xl text-gray-600 mb-8">
+                Upload your medical scan for AI-powered analysis and reporting.
+            </p>
+            
+            <form class="space-y-6">
+                <div>
+                    <label for="patientName" class="block text-sm font-medium text-gray-700 mb-2">Patient Name</label>
+                    <input 
+                        type="text" 
+                        id="patientName" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Patient Full Name"
+                        required
+                    >
+                </div>
+                
+                <div>
+                    <label for="imageUpload" class="block text-sm font-medium text-gray-700 mb-2">Upload Scan</label>
+                    <div class="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
+                        <div class="space-y-1 text-center">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <div class="flex text-sm text-gray-600">
+                                <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                    <span>Upload a file</span>
+                                    <input id="file-upload" name="file-upload" type="file" class="sr-only" accept="image/*">
+                                </label>
+                                <p class="pl-1">or drag and drop</p>
+                            </div>
+                            <p class="text-xs text-gray-500">
+                                PNG, JPG, DICOM up to 10MB
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="scanType" class="block text-sm font-medium text-gray-700 mb-2">Scan Type</label>
+                    <select 
+                        id="scanType" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                    >
+                        <option value="">Select Scan Type</option>
+                        <option value="xray">X-Ray</option>
+                        <option value="mri">MRI</option>
+                        <option value="ct">CT Scan</option>
+                        <option value="ultrasound">Ultrasound</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <button 
+                        type="button" 
+                        class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-semibold text-lg"
+                    >
+                        Generate Report
+                    </button>
+                    <button 
+                        type="button" 
+                        class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition font-semibold text-lg"
+                    >
+                        Download Report
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Image Preview and Benefits Section -->
+        <div class="space-y-8">
+            <div class="bg-gray-50 p-6 rounded-xl">
+                <h3 class="text-xl font-semibold mb-4 text-gray-900">Image Preview</h3>
+                <div class="border-2 border-dashed border-gray-300 rounded-lg h-80 flex items-center justify-center">
+                    <p class="text-gray-500">No image uploaded</p>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 p-6 rounded-xl flex items-start space-x-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                <div>
+                    <h3 class="text-xl font-semibold mb-2">AI-Powered Analysis</h3>
+                    <p class="text-gray-600">Advanced machine learning provides detailed, accurate insights.</p>
+                </div>
+            </div>
+            
+            <div class="bg-gray-50 p-6 rounded-xl flex items-start space-x-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <div>
+                    <h3 class="text-xl font-semibold mb-2">Comprehensive Reporting</h3>
+                    <p class="text-gray-600">Detailed medical reports with AI-assisted analysis and insights.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4 grid md:grid-cols-4 gap-8">
+            <div>
+                <div class="text-2xl font-bold text-blue-500 mb-4">Pulse</div>
+                <p class="text-gray-400">AI-Powered Radiology Assistance</p>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-4">Product</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="text-gray-300 hover:text-white">Features</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-white">Pricing</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-white">Integrations</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-4">Company</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="text-gray-300 hover:text-white">About</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-white">Careers</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-white">Contact</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-4">Legal</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="text-gray-300 hover:text-white">Privacy Policy</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-white">Terms of Service</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-white">HIPAA Compliance</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
