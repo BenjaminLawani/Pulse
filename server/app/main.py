@@ -2,7 +2,7 @@ import io
 import uuid
 import re
 import torch
-from .config import *
+from config import *
 import os
 from datetime import datetime, timedelta, UTC
 from passlib.context import CryptContext
