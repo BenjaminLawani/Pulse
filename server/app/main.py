@@ -443,6 +443,6 @@ async def sign_in(request: Request, user_data: UserLogin, db: Session = Depends(
         )
 
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=10000, reload=False, workers=4)
+# if __name__ == "__main__":
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=10000, reload=False, workers=4)
