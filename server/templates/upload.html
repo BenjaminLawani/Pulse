@@ -32,65 +32,55 @@
                 Upload your medical scan for AI-powered analysis and reporting.
             </p>
             
-            <form class="space-y-6">
+            <form id="upload-form">
                 <div>
-                    <label for="patientName" class="block text-sm font-medium text-gray-700 mb-2">Patient Name</label>
+                    <label for="patient-name">Patient Name</label>
                     <input 
                         type="text" 
-                        id="patientName" 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Patient Full Name"
-                        required
+                        id="patient-name" 
+                        name="patient_name" 
+                        placeholder="Enter patient name"
                     >
                 </div>
-                
+        
                 <div>
-                    <label for="imageUpload" class="block text-sm font-medium text-gray-700 mb-2">Upload Scan</label>
-                    <div class="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
-                        <div class="space-y-1 text-center">
-                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                            <div class="flex text-sm text-gray-600">
-                                <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                                    <span>Upload a file</span>
-                                    <input id="file-upload" name="file-upload" type="file" class="sr-only" accept="image/*">
-                                </label>
-                                <p class="pl-1">or drag and drop</p>
-                            </div>
-                            <p class="text-xs text-gray-500">
-                                PNG, JPG, DICOM up to 10MB
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div>
-                    <label for="scanType" class="block text-sm font-medium text-gray-700 mb-2">Scan Type</label>
-                    <select 
-                        id="scanType" 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        required
+                    <label for="file-input">Upload Scan</label>
+                    <input 
+                        type="file" 
+                        id="file-input" 
+                        name="file" 
+                        accept=".png,.jpg,.jpeg,.dcm,.dicom"
                     >
+                </div>
+        
+                <div>
+                    <label for="scan-type">Scan Type</label>
+                    <select id="scan-type" name="scan_type">
                         <option value="">Select Scan Type</option>
-                        <option value="xray">X-Ray</option>
-                        <option value="mri">MRI</option>
-                        <option value="ct">CT Scan</option>
-                        <option value="ultrasound">Ultrasound</option>
-                        <option value="other">Other</option>
+                        <option value="brain">X-Ray</option>
+                        <option value="bone">MRI</option>
+                        <option value="brain">CT Scan</option>
+                        <option value="bone">Ultrasound</option>
                     </select>
                 </div>
-                
+        
+                <div id="image-preview" class="border-2 border-dashed border-gray-300 rounded-lg h-80 flex items-center justify-center">
+                    No image uploaded
+                </div>
+        
                 <div class="grid grid-cols-2 gap-4">
                     <button 
                         type="button" 
-                        class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-semibold text-lg"
+                        id="generate-report" 
+                        class="bg-blue-600 text-white py-2 rounded"
                     >
                         Generate Report
                     </button>
                     <button 
                         type="button" 
-                        class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition font-semibold text-lg"
+                        id="download-report" 
+                        class="bg-green-600 text-white py-2 rounded" 
+                        disabled
                     >
                         Download Report
                     </button>
@@ -162,5 +152,99 @@
             </div>
         </div>
     </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+    const uploadForm = document.getElementById('upload-form');
+    const fileInput = document.getElementById('file-input');
+    const patientNameInput = document.getElementById('patient-name');
+    const scanTypeSelect = document.getElementById('scan-type');
+    const imagePreview = document.getElementById('image-preview');
+    const generateReportBtn = document.getElementById('generate-report');
+    const downloadReportBtn = document.getElementById('download-report');
+
+    let uploadedFile = null;
+    let diagnosticResults = null;
+
+    // File upload and preview
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            uploadedFile = file;
+            
+            // Image preview
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                imagePreview.innerHTML = `<img src="${event.target.result}" class="max-h-full max-w-full object-contain">`;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // AI Analysis and Report Generation
+    generateReportBtn.addEventListener('click', async () => {
+        if (!uploadedFile) {
+            alert('Please upload an image first');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', uploadedFile);
+        formData.append('modality', scanTypeSelect.value);
+
+        try {
+            // First, analyze the image
+            const analysisResponse = await fetch('/analyze/image', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!analysisResponse.ok) {
+                throw new Error('Image analysis failed');
+            }
+
+            const analysisResult = await analysisResponse.json();
+            diagnosticResults = analysisResult;
+
+            // Then generate the report
+            const reportResponse = await fetch('/generate-report', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                },
+                body: JSON.stringify({
+                    findings: analysisResult.findings.map(f => `${f.condition}: ${f.probability}`),
+                    patient_info: {
+                        'Patient Name': patientNameInput.value || 'Unknown',
+                        'Scan Type': scanTypeSelect.value
+                    }
+                })
+            });
+
+            if (!reportResponse.ok) {
+                throw new Error('Report generation failed');
+            }
+
+            const reportResult = await reportResponse.json();
+
+            // Enable download button and potentially display report
+            downloadReportBtn.disabled = false;
+            downloadReportBtn.addEventListener('click', () => {
+                const blob = new Blob([reportResult.raw_report], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `medical_report_${new Date().toISOString()}.txt`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+            });
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred during image analysis or report generation');
+        }
+    });
+});
+    </script>
 </body>
 </html>
