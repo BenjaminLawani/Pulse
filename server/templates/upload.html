@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="static/Captured-removebg-preview.png" type="image/x-icon">
     <title>Upload Image - Pulse</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -257,7 +258,6 @@
         window.location.href = '/login';
     });
 
-    // Optional: Check for existing token on page load
     document.addEventListener('DOMContentLoaded', function() {
         const token = localStorage.getItem('access_token');
         if (!token) {

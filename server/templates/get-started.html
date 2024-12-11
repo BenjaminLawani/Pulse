@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="static/Captured-removebg-preview.png" type="image/x-icon">
+
     <title>Pulse - Get Started</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
     <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
         <div class="flex items-center space-x-3">
-            <h1 class="text-2xl font-bold text-blue-600">Pulse</h1>
+            <h1 class="text-2xl font-bold text-blue-600"><a href="/">Pulse</a></h1>
         </div>
         <div class="space-x-6">
-            <a href="#" class="hover:text-blue-600 transition">Features</a>
-            <a href="#" class="hover:text-blue-600 transition">Pricing</a>
+
             <a href="/login" class="hover:text-blue-600 transition">Login</a>
-            <a href="/get-started" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Contact Sales</a>
+            <a href="mailto:benjamin.lawani@outlook.com" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Contact Sales</a>
         </div>
     </nav>
 
@@ -128,32 +129,73 @@
     </footer>
 
     <script>
-        document.getElementById('signup-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData.entries());
+        // Function to show custom alert
+function showAlert(message, isSuccess) {
+    // Remove any existing alerts
+    const existingAlerts = document.querySelectorAll('.custom-alert');
+    existingAlerts.forEach(alert => alert.remove());
 
-            try {
-                const response = await fetch('/get-started', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
+    // Create alert element
+    const alertDiv = document.createElement('div');
+    alertDiv.classList.add('custom-alert', 'fixed', 'top-4', 'right-4', 'px-6', 'py-4', 'rounded-lg', 'shadow-lg', 'z-50', 'transition-all', 'duration-300', 'opacity-0', 'translate-x-full');
+    
+    // Set color based on success/error
+    if (isSuccess) {
+        alertDiv.classList.add('bg-green-500', 'text-white');
+    } else {
+        alertDiv.classList.add('bg-red-500', 'text-white');
+    }
 
-                if (response.ok) {
-                    alert('Account created successfully!');
-                    window.location.href = '/upload';
-                } else {
-                    const errorData = await response.json();
-                    alert(`Error: ${errorData.detail}`);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred while creating your account');
-            }
+    // Set message
+    alertDiv.textContent = message;
+
+    // Append to body
+    document.body.appendChild(alertDiv);
+
+    // Trigger reflow to enable transition
+    alertDiv.offsetWidth;
+
+    // Show alert
+    alertDiv.classList.remove('opacity-0', 'translate-x-full');
+
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        alertDiv.classList.add('opacity-0', 'translate-x-full');
+        
+        // Remove from DOM after transition
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 300);
+    }, 5000);
+}
+
+// Modify existing form submission script
+document.getElementById('signup-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+        const response = await fetch('/get-started', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
         });
+
+        if (response.ok) {
+            showAlert('Account created successfully!', true);
+            window.location.href = '/upload';
+        } else {
+            const errorData = await response.json();
+            showAlert(`Error: ${errorData.detail}`, false);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showAlert('An error occurred while creating your account', false);
+    }
+});
     </script>
 </body>
 </html>

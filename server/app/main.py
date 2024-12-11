@@ -12,6 +12,7 @@ import pydicom
 from transformers import AutoFeatureExtractor, AutoModelForImageClassification
 from PIL import Image
 from fastapi import FastAPI, File, UploadFile, HTTPException, Depends, status
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, EmailStr, Field
@@ -204,11 +205,12 @@ class DiagnosticResult(BaseModel):
     patient_info: dict = {}
 
 app = FastAPI(
-    title="Radiology Assistant API",
-    description="AI-powered medical image analysis API",
+    title="Pulse API",
+    description="AI-powered radiography assistant",
     version="1.0.0"
 )
 
+app.mount("/static", StaticFiles(directory="../templates/static"), name="static")
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
