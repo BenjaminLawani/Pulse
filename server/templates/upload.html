@@ -153,99 +153,148 @@
             </div>
         </div>
     </footer>
+    <div id="custom-alert" class="fixed top-5 right-5 z-50 px-4 py-3 rounded-md text-white hidden"></div>
+
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-    const uploadForm = document.getElementById('upload-form');
-    const fileInput = document.getElementById('file-input');
-    const patientNameInput = document.getElementById('patient-name');
-    const scanTypeSelect = document.getElementById('scan-type');
-    const imagePreview = document.getElementById('image-preview');
-    const generateReportBtn = document.getElementById('generate-report');
-    const downloadReportBtn = document.getElementById('download-report');
-
-    let uploadedFile = null;
-    let diagnosticResults = null;
-
-    // File upload and preview
-    fileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            uploadedFile = file;
+        // Custom Alert Function
+        function showCustomAlert(message, type) {
+            const alertElement = document.getElementById('custom-alert');
+            alertElement.textContent = message;
             
-            // Image preview
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                imagePreview.innerHTML = `<img src="${event.target.result}" class="max-h-full max-w-full object-contain">`;
-            };
-            reader.readAsDataURL(file);
+            // Remove previous color classes
+            alertElement.classList.remove('bg-green-500', 'bg-red-500', 'hidden');
+            
+            // Add appropriate color class
+            alertElement.classList.add(
+                type === 'success' ? 'bg-green-500' : 'bg-red-500',
+                'block'
+            );
+
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                alertElement.classList.add('hidden');
+            }, 5000);
         }
-    });
 
-    // AI Analysis and Report Generation
-    generateReportBtn.addEventListener('click', async () => {
-        if (!uploadedFile) {
-            alert('Please upload an image first');
-            return;
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const uploadForm = document.getElementById('upload-form');
+            const fileInput = document.getElementById('file-input');
+            const patientNameInput = document.getElementById('patient-name');
+            const scanTypeSelect = document.getElementById('scan-type');
+            const imagePreview = document.getElementById('image-preview');
+            const generateReportBtn = document.getElementById('generate-report');
+            const downloadReportBtn = document.getElementById('download-report');
 
-        const formData = new FormData();
-        formData.append('file', uploadedFile);
-        formData.append('modality', scanTypeSelect.value);
+            let uploadedFile = null;
+            let diagnosticResults = null;
 
-        try {
-            // First, analyze the image
-            const analysisResponse = await fetch('/analyze/image', {
-                method: 'POST',
-                body: formData
+            // File upload and preview (existing code remains the same)
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    uploadedFile = file;
+                    
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        imagePreview.innerHTML = `<img src="${event.target.result}" class="max-h-full max-w-full object-contain">`;
+                    };
+                    reader.readAsDataURL(file);
+                }
             });
 
-            if (!analysisResponse.ok) {
-                throw new Error('Image analysis failed');
-            }
+            // AI Analysis and Report Generation
+            generateReportBtn.addEventListener('click', async () => {
+                if (!uploadedFile) {
+                    showCustomAlert('Please upload an image first', 'error');
+                    return;
+                }
 
-            const analysisResult = await analysisResponse.json();
-            diagnosticResults = analysisResult;
+                // Disable button and show loading state
+                generateReportBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                generateReportBtn.innerHTML = `
+                    <div class="flex items-center justify-center">
+                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Generating Report...
+                    </div>
+                `;
+                generateReportBtn.disabled = true;
 
-            // Then generate the report
-            const reportResponse = await fetch('/generate-report', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-                },
-                body: JSON.stringify({
-                    findings: analysisResult.findings.map(f => `${f.condition}: ${f.probability}`),
-                    patient_info: {
-                        'Patient Name': patientNameInput.value || 'Unknown',
-                        'Scan Type': scanTypeSelect.value
+                const formData = new FormData();
+                formData.append('file', uploadedFile);
+                formData.append('modality', scanTypeSelect.value);
+
+                try {
+                    // First, analyze the image
+                    const analysisResponse = await fetch('/analyze/image', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!analysisResponse.ok) {
+                        throw new Error('Image analysis failed');
                     }
-                })
+
+                    const analysisResult = await analysisResponse.json();
+                    diagnosticResults = analysisResult;
+
+                    // Then generate the report
+                    const reportResponse = await fetch('/generate-report', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                        },
+                        body: JSON.stringify({
+                            findings: analysisResult.findings.map(f => `${f.condition}: ${f.probability}`),
+                            patient_info: {
+                                'Patient Name': patientNameInput.value || 'Unknown',
+                                'Scan Type': scanTypeSelect.value
+                            }
+                        })
+                    });
+
+                    if (!reportResponse.ok) {
+                        throw new Error('Report generation failed');
+                    }
+
+                    const reportResult = await reportResponse.json();
+
+                    // Success state
+                    showCustomAlert('Report generated successfully!', 'success');
+                    
+                    // Reset generate report button
+                    generateReportBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    generateReportBtn.innerHTML = 'Generate Report';
+                    generateReportBtn.disabled = false;
+
+                    // Enable download button and set download functionality
+                    downloadReportBtn.disabled = false;
+                    downloadReportBtn.addEventListener('click', () => {
+                        const blob = new Blob([reportResult.raw_report], { type: 'text/plain' });
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `medical_report_${new Date().toISOString()}.txt`;
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    });
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    
+                    // Error state
+                    showCustomAlert('Failed to generate report. Please try again.', 'error');
+                    
+                    // Reset generate report button
+                    generateReportBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    generateReportBtn.innerHTML = 'Generate Report';
+                    generateReportBtn.disabled = false;
+                }
             });
-
-            if (!reportResponse.ok) {
-                throw new Error('Report generation failed');
-            }
-
-            const reportResult = await reportResponse.json();
-
-            // Enable download button and potentially display report
-            downloadReportBtn.disabled = false;
-            downloadReportBtn.addEventListener('click', () => {
-                const blob = new Blob([reportResult.raw_report], { type: 'text/plain' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `medical_report_${new Date().toISOString()}.txt`;
-                a.click();
-                window.URL.revokeObjectURL(url);
-            });
-
-        } catch (error) {
-            console.error('Error:', error);
-            alert('An error occurred during image analysis or report generation');
-        }
-    });
-});
+        });
     </script>
 
 <script>
