@@ -32,10 +32,11 @@ from sqlalchemy import (
 from sqlalchemy.orm import sessionmaker, declarative_base, Session
 from sqlalchemy.dialects.postgresql import UUID
 from services import EmailService, EmailServiceConfig
-
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 engine = create_engine(DB_URL)
 SessionLocal = sessionmaker(engine, autocommit=False)
-
+limiter = Limiter(key_func=get_remote_address)
 Base = declarative_base()
 
 
@@ -319,7 +320,9 @@ def get_upload_page(request: Request):
     return templates.TemplateResponse('upload.html', {'request': request})
 
 @app.post("/generate-report")
+@limiter.limit("1/hour")
 async def generate_radiology_report(
+    request: Request,
     report_request: ReportRequest
 ):
     try:
@@ -411,6 +414,7 @@ def _extract_section(report: str, section_name: str) -> str:
         return ""
     
 @app.post('/get-started', response_model=UserResponse)
+@limiter.limit("3/minute")
 async def create_account(
     request: Request,
     user: UserCreate, 
@@ -446,6 +450,7 @@ async def create_account(
         raise HTTPException(status_code=500, detail=f"Failed to create account: {str(e)}")
 
 @app.post('/login')
+@limiter.limit("3/minute")
 async def sign_in(request: Request, user_data: UserLogin, db: Session = Depends(get_db)):
     """Handle user login"""
     try:
@@ -483,6 +488,7 @@ async def get_forgot_password_page(request: Request):
     return templates.TemplateResponse('forgot-password.html', {'request': request})
 
 @app.post('/forgot-password')
+@limiter.limit("3/minute")
 async def forgot_password(request: Request, user: UserForgotPassword, db: Session = Depends(get_db)):
     """Handle password reset requests"""
     if not user.email:
