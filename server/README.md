@@ -1,3 +1,3 @@
 ## Pulse
-
-Pulse is an AI radiography assistant
+LabLab.ai Hackathon Submission
+Access the solution at: pulse-razi.onrender.com

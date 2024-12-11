@@ -1,5 +1,7 @@
 import io
 import uuid
+import random
+import string
 import re
 import torch
 from config import *
@@ -29,6 +31,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import sessionmaker, declarative_base, Session
 from sqlalchemy.dialects.postgresql import UUID
+from services import EmailService, EmailServiceConfig
 
 engine = create_engine(DB_URL)
 SessionLocal = sessionmaker(engine, autocommit=False)
@@ -43,6 +46,20 @@ groq_client = Groq(
     api_key= GROQ_API_KEY
 )
 templates = Jinja2Templates("../templates")
+email_config = EmailServiceConfig(
+    MAIL_USERNAME=MAIL_USERNAME,
+    MAIL_PASSWORD=MAIL_PASSWORD,
+    MAIL_FROM=MAIL_FROM,
+    MAIL_PORT=587,
+    MAIL_SERVER=MAIL_SERVER,
+    MAIL_FROM_NAME=MAIL_FROM_NAME,
+    MAIL_STARTTLS=True,
+    MAIL_SSL_TLS=False,
+    USE_CREDENTIALS=True,
+    VALIDATE_CERTS=True
+)
+
+fm = EmailService(config=email_config)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 class User(Base):
@@ -85,6 +102,20 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     encoded_jwt = jwt_encode(to_encode)
     return encoded_jwt
 
+def generate_temporary_password(length: int = 8) -> str:
+    """
+    Generate a temporary password consisting of random letters and digits.
+
+    Parameters:
+    length (int): The length of the generated password. Default is 8.
+
+    Returns:
+    str: A randomly generated password containing uppercase letters, lowercase letters, and digits.
+
+    """
+    characters = string.ascii_letters + string.digits
+    return ''.join(random.choice(characters) for _ in range(length))
+
 
 class UserBase(BaseModel):
     username: str
@@ -110,6 +141,9 @@ class ReportResponse(BaseModel):
 class UserLogin(BaseModel):
     email: str = Field(..., description="Email or username of the user")
     password: str = Field(..., min_length=8)
+
+class UserForgotPassword(BaseModel):
+    email: EmailStr
 
 class RadiologyAssistant:
     def __init__(self):
@@ -444,6 +478,56 @@ async def sign_in(request: Request, user_data: UserLogin, db: Session = Depends(
             detail="Login failed due to server error"
         )
 
+@app.get("/forgot-password")
+async def get_forgot_password_page(request: Request):
+    return templates.TemplateResponse('forgot-password.html', {'request': request})
+
+@app.post('/forgot-password')
+async def forgot_password(request: Request, user: UserForgotPassword, db: Session = Depends(get_db)):
+    """Handle password reset requests"""
+    if not user.email:
+        raise HTTPException(
+            status_code=400,
+            detail="Email is required"
+        )
+        
+    try:
+        db_user = db.query(User).filter(User.email == user.email).first()
+        
+        if not db_user:
+            raise HTTPException(
+                status_code=404,
+                detail="User not found"
+            )
+        
+        temp_password = generate_temporary_password()
+        hashed_password = hash_password(temp_password)
+        
+        db_user.password = hashed_password
+        db.commit()
+
+        await fm.send_email(
+            subject="Password Reset Request",
+            recipients=[db_user.email],
+            body=f"""
+                <h2>Password Reset</h2>
+                <p>Your temporary password is: <strong>{temp_password}</strong></p>
+                <p>Please log in and change your password immediately.</p>
+                <p>If you didn't request this password reset, please contact support immediately.</p>
+            """,
+            subtype="html"
+        )
+        
+        return {"message": "A temporary password has been sent to your email."}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to process password reset request"
+        )
 
 # if __name__ == "__main__":
 #     import uvicorn
