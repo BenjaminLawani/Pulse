@@ -1,4 +1,4 @@
-# Pulse API
+# Pulse
 
 Pulse is an AI-powered radiography assistant designed to streamline medical imaging analysis and reporting. By leveraging state-of-the-art machine learning models, Pulse API supports radiologists with preliminary insights for brain tumor classification and bone fracture detection.
 
