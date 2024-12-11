@@ -115,9 +115,9 @@ This project is licensed under the MIT License. See the LICENSE file for details
 ---
 
 ## Coming Soon
-[ ] More Accurate Models
-[ ] 3D support
-[ ] Educational Resource Bot for Radiologists-in-Training
+- [ ] More Accurate Models
+- [ ] 3D support
+- [ ] Educational Resource Bot for Radiologists-in-Training
 
 ---
 
