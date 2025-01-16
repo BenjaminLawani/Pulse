@@ -530,7 +530,3 @@ async def forgot_password(request: Request, user: UserForgotPassword, db: Sessio
             status_code=500,
             detail="Failed to process password reset request"
         )
-
-# if __name__ == "__main__":
-#     import uvicorn
-#     uvicorn.run(app, host="0.0.0.0", port=10000, reload=False, workers=4)
