@@ -359,7 +359,7 @@ Format the report to be clear, precise, and clinically relevant."""
                     "content": prompt
                 }
             ],
-            model="mixtral-8x7b-32768",
+            model="llama-3.2-3b-preview",
             temperature=0.3,  
             max_tokens=1024
         )
